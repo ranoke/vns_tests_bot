@@ -1,63 +1,54 @@
-function Answer(question, answer) {
-  this.question = question;
-  this.answer = answer;
+function get_question_type() {
+	var test_class_truefalse = "que truefalse adaptive notyetanswered";
+	var test_class_multichoise = "que multichoice adaptive notyetanswered";
+	if (document.getElementsByClassName(test_class_truefalse).length != 0) return test_class_truefalse;
+	else if (document.getElementsByClassName(test_class_multichoise).length != 0) return test_class_multichoise;
 }
-
-const downloadToFile = (content, filename, contentType) => {
-  const a = document.createElement('a');
-  const file = new Blob([content], { type: contentType });
-
-  a.href = URL.createObjectURL(file);
-  a.download = filename;
-  a.click();
-
-  URL.revokeObjectURL(a.href);
-};
-
-
-
 
 console.log("Doing job...");
 
+
+
 var answerJsonSrc = prompt("Please json with answers", "");
 
-//answerJsonSrc = '{"answer":[{"question":"Правильним є словосполучення згідно наказу","answer":"Неправильно"},{"question":"Правильним є словосполучення відповідно постанови","answer":"Неправильно"},{"question":"Правильним є словосполучення за інструкцією інженера","answer":"Правильно"},{"question":"Правильним є словосполучення прийняти міри","answer":"Неправильно"},{"question":"Правильним є словосполучення в залежності від потужності","answer":"Неправильно"},{"question":"Правильним є словосполучення брати участь у нараді","answer":"Правильно"},{"question":"Правильним є словосполучення рекомендований лист","answer":"Правильно"},{"question":"Правильним є словосполучення бувший механік","answer":"Неправильно"},{"question":"Правильним є словосполучення купляти в магазині електротоварів","answer":"Неправильно"},{"question":"Правильним є словосполучення завідувач кафедри автомобілебудування","answer":"Правильно"}],"count":10}';
 
 
-var testClass = "que truefalse adaptive notyetanswered";
 var qtext = "qtext";
+var answerJson = JSON.parse(answerJsonSrc);
 
-var aJson = JSON.parse(answerJsonSrc);
-
-console.log(aJson);
-
+console.log(answerJson);
 
 
-let tests = document.getElementsByClassName(testClass);
-let questions = document.getElementsByClassName(qtext);
-for (var i = 0; i < tests.length; i++) {
-  var q = questions[i].getElementsByTagName("p")[0].textContent;
+question_type = get_question_type();
+console.log("Question type: " + question_type);
+let test_objets = document.getElementsByClassName(question_type);
+let question_objects = document.getElementsByClassName(qtext);
 
+console.log("Test count is: " + test_objets.length);
+console.log("Question count is: " + question_objects.length);
 
-  for (var j = 0; j < aJson.count; j++) {
-    var to_search = aJson.answer[j].question;
+for (var i = 0; i < test_objets.length; i++) {
+	var question_text = question_objects[i].textContent;
 
-    //console.log("Searching: " + to_search);
-    if (q == to_search) {
-      var a = aJson.answer[j].answer;
-      cAns = tests[i].getElementsByClassName("answer")[0].childNodes;
-      for (var n = 0; n < cAns.length; n++) {
-        if (a == cAns[n].getElementsByTagName("label")[0].textContent) {
-          cAns[n].getElementsByTagName("input")[0].click();
-          console.log("click: " + a + " " + q);
-        }
-      }
-    }
-  }
+	for (var j = 0; j < answerJson.count; j++) {
+		var to_search = answerJson.answer[j].question;
 
+		if (question_text == to_search) {
+			var answer = answerJson.answer[j].answer;
+			var possible_answer_objects = test_objets[i].getElementsByClassName("answer")[0].childNodes;
+			for (var n = 0; n < possible_answer_objects.length; n++) {
+				var possible_answer_object = possible_answer_objects[n];
+				console.log(possible_answer_object);
+				if (!possible_answer_object) continue;
+				var possible_answer_text = possible_answer_object.textContent;
+
+				console.log(possible_answer_text + " | " + answer);
+				if (!possible_answer_text) continue;
+				if (possible_answer_text.includes(answer)) {
+					console.log("Click");
+					possible_answer_object.getElementsByTagName("input")[0].click();
+				}
+			}
+		}
+	}
 }
-//var jsonString = JSON.stringify(aJson);
-
-//console.log(jsonString);
-
-//downloadToFile(jsonString, "answers.json", "text/plain");
